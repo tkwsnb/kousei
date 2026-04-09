@@ -52,7 +52,8 @@ function App() {
   };
 
   return (
-    <div>
+    <div className="app-wrapper">
+      <header>
       <h1>本文校正くん</h1>
       <p className="subtitle">
         段落下げや感嘆符（！？）後ろの空白、かぎ括弧（「」）や丸括弧（（））の閉じ忘れをチェックするための小説向け校正ツール
@@ -65,7 +66,9 @@ function App() {
         総文字数: {stats.charCount} 字 /
         原稿用紙（400字詰）換算: 約 {stats.manuscriptPages} 枚
       </div>
+      </header>
 
+      <main>
       <div className="controls">
         <button className="btn-primary" onClick={handleCheck}>
           ▼ チェックする
@@ -76,7 +79,7 @@ function App() {
       </div>
 
       <div className="container">
-        <div className="pane">
+        <section className="pane">
           <div className="pane-title">■ 原文エディタ</div>
           <div className="pane-content">
             <textarea
@@ -85,9 +88,9 @@ function App() {
               placeholder="ここに小説の本文を入力・ペーストしてください。"
             />
           </div>
-        </div>
+        </section>
 
-        <div className="pane">
+        <section className="pane">
           <div className="pane-title">■ 校正プレビュー（赤字が修正箇所）</div>
           <div className="pane-content">
             <DiffViewer
@@ -96,7 +99,7 @@ function App() {
               activeIds={activeIds}
             />
           </div>
-        </div>
+        </section>
       </div>
 
       {corrections.length > 0 && (
@@ -107,11 +110,14 @@ function App() {
           onToggleAll={toggleAll}
         />
       )}
+      </main>
 
       <hr />
-      <div className="footer">
-        <a href="https://tkwsnb.net/">トップへ戻る</a> | <a href="https://x.com/tkwsnb">作った人</a>
-      </div>
+      <footer>
+        <div className="footer">
+          <a href="https://tkwsnb.net/">トップへ戻る</a> | <a href="https://x.com/tkwsnb">作った人</a>
+        </div>
+      </footer>
     </div>
   );
 }
