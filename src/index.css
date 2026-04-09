@@ -1,0 +1,122 @@
+body {
+  font-family: "MS PMincho", "MS Mincho", "ＭＳ Ｐ明朝", "ＭＳ 明朝", serif;
+  background-color: #ffffff;
+  color: #000000;
+  margin: 20px;
+}
+
+a {
+  color: #0000ff;
+  text-decoration: underline;
+}
+
+a:visited {
+  color: #800080;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid #000000;
+  margin: 20px 0;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+table, th, td {
+  border: 1px solid #000000;
+}
+
+th, td {
+  padding: 5px;
+}
+
+h1 {
+  text-align: center;
+  border-bottom: 2px solid #000000;
+  padding-bottom: 5px;
+}
+
+.container {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+}
+
+.pane {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #000000;
+  margin: 5px;
+  height: 600px;
+  display: flex;
+  flex-direction: column;
+}
+
+.pane-title {
+  font-weight: bold;
+  background-color: #eeeeee;
+  border-bottom: 1px solid #000000;
+  padding: 5px;
+  margin: -10px -10px 10px -10px;
+}
+
+.pane-content {
+  flex: 1;
+  overflow-y: auto;
+}
+
+textarea {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  font-family: inherit;
+  font-size: 16px;
+  border: 1px inset #cccccc;
+  resize: none;
+  padding: 5px;
+  line-height: 1.6;
+}
+
+.preview-text {
+  font-family: inherit;
+  font-size: 16px;
+  white-space: pre-wrap;
+  line-height: 1.6;
+}
+
+.diff-add {
+  color: #ff0000;
+  font-weight: bold;
+  background-color: #ffe6e6;
+}
+
+.correction-list {
+  margin-top: 20px;
+  border: 1px solid #000000;
+  padding: 10px;
+}
+
+.stats {
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+button {
+  font-family: inherit;
+  font-size: 14px;
+  padding: 5px 10px;
+  border: 1px outset #cccccc;
+  background-color: #e0e0e0;
+  cursor: pointer;
+}
+
+button:active {
+  border: 1px inset #cccccc;
+}
+
+.controls {
+  text-align: center;
+  margin: 10px 0;
+}
