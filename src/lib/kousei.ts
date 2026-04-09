@@ -50,18 +50,31 @@ export const analyzeText = (text: string): Correction[] => {
     });
   }
 
-  // ルール3: 三点リーダの偶数化
-  const ellipsisRegex = /(…+)/g;
+  // ルール3: 三点リーダの適正化（表記ゆれ修正と偶数化）
+  // 連続する「…」、または2文字以上の「・」「。」「.」を検知
+  const ellipsisRegex = /([…]{1,}|[・。\.]{2,})/g;
   while ((m = ellipsisRegex.exec(text)) !== null) {
-    if (m[0].length % 2 !== 0) {
+    const str = m[0];
+    
+    // 現在の文字数
+    let targetLen = str.length;
+    // 奇数なら +1 して偶数個にする（例: 1文字なら2文字、3文字なら4文字）
+    if (targetLen % 2 !== 0) {
+      targetLen += 1;
+    }
+
+    const proposed = '…'.repeat(targetLen);
+
+    // 既に正しい三点リーダになっている場合はスキップ
+    if (str !== proposed) {
       raw.push({
         id: uid(),
         ruleId: 'ellipsis',
         index: m.index,
-        length: m[0].length,
-        original: m[0],
-        proposed: m[0] + '…',
-        reason: '三点リーダは偶数個（……）で使用するのが基本です。',
+        length: str.length,
+        original: str,
+        proposed: proposed,
+        reason: '三点リーダは「……」のように2文字（偶数個）の全角記号で使用するのが基本です。',
       });
     }
   }
