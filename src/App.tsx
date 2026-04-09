@@ -54,62 +54,61 @@ function App() {
   return (
     <div className="app-wrapper">
       <header>
-      <h1>本文校正くん</h1>
-      <p className="subtitle">
-        段落下げや感嘆符（！？）後ろの空白、かぎ括弧（「」）や丸括弧（（））の閉じ忘れをチェックするための小説向け校正ツール
-      </p>
-      <hr />
-
-      <div className="stats">
-        【文字数統計】
-        純文字数（空白除き）: {stats.charCountNoSpace} 字 /
-        総文字数: {stats.charCount} 字 /
-        原稿用紙（400字詰）換算: 約 {stats.manuscriptPages} 枚
-      </div>
+        <h1>本文校正くん</h1>
+        <p className="subtitle">
+          段落下げや感嘆符（！？）後ろの空白、かぎ括弧（「」）や丸括弧（（））の閉じ忘れをチェックするための小説向け校正ツール
+        </p>
+        <hr />
+        <div className="stats">
+          【文字数統計】
+          純文字数（空白除き）: {stats.charCountNoSpace} 字 /
+          総文字数: {stats.charCount} 字 /
+          原稿用紙（400字詰）換算: 約 {stats.manuscriptPages} 枚
+        </div>
       </header>
 
       <main>
-      <div className="controls">
-        <button className="btn-primary" onClick={handleCheck}>
-          ▼ チェックする
-        </button>
-        <button className="btn-primary" onClick={handleApply}>
-          ◀ エディタに反映する
-        </button>
-      </div>
+        <div className="controls">
+          <button className="btn-primary" onClick={handleCheck}>
+            ▼ チェックする
+          </button>
+          <button className="btn-primary" onClick={handleApply}>
+            ◀ エディタに反映する
+          </button>
+        </div>
 
-      <div className="container">
-        <section className="pane">
-          <div className="pane-title">■ 原文エディタ</div>
-          <div className="pane-content">
-            <textarea
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-              placeholder="ここに小説の本文を入力・ペーストしてください。"
-            />
-          </div>
-        </section>
+        <div className="container">
+          <section className="pane">
+            <div className="pane-title">■ 原文エディタ</div>
+            <div className="pane-content">
+              <textarea
+                value={inputText}
+                onChange={(e) => setInputText(e.target.value)}
+                placeholder="ここに小説の本文を入力・ペーストしてください。"
+              />
+            </div>
+          </section>
 
-        <section className="pane">
-          <div className="pane-title">■ 校正プレビュー（赤字が修正箇所）</div>
-          <div className="pane-content">
-            <DiffViewer
-              originalText={checkedText}
-              corrections={corrections}
-              activeIds={activeIds}
-            />
-          </div>
-        </section>
-      </div>
+          <section className="pane">
+            <div className="pane-title">■ 校正プレビュー（赤字が修正箇所）</div>
+            <div className="pane-content">
+              <DiffViewer
+                originalText={checkedText}
+                corrections={corrections}
+                activeIds={activeIds}
+              />
+            </div>
+          </section>
+        </div>
 
-      {corrections.length > 0 && (
-        <CorrectionList
-          corrections={corrections}
-          activeIds={activeIds}
-          onToggle={toggleCorrection}
-          onToggleAll={toggleAll}
-        />
-      )}
+        {corrections.length > 0 && (
+          <CorrectionList
+            corrections={corrections}
+            activeIds={activeIds}
+            onToggle={toggleCorrection}
+            onToggleAll={toggleAll}
+          />
+        )}
       </main>
 
       <hr />

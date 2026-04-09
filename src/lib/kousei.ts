@@ -13,19 +13,15 @@ export interface Correction {
 // ユニークIDを生成するヘルパー
 const uid = (): string => Math.random().toString(36).substring(2, 11);
 
-/**
- * テキストを解析し、校正候補を返す
- * 各ルールは独立して検出を行い、最後に重複排除する
- */
-export const analyzeText = (text: string): Correction[] => {
-  const raw: Correction[] = [];
+// --- 個別ルール検出関数 ---
 
-  // ルール1: 段落下げ
-  // 行頭がスペース・改行・カギ括弧以外の文字で始まる場合
-  const indentRegex = /^([^ \t　\n「『])/gm;
+/** ルール1: 段落下げ — 行頭がスペース・カギ括弧以外の文字で始まる場合 */
+const detectIndent = (text: string): Correction[] => {
+  const results: Correction[] = [];
+  const regex = /^([^ \t　\n「『])/gm;
   let m: RegExpExecArray | null;
-  while ((m = indentRegex.exec(text)) !== null) {
-    raw.push({
+  while ((m = regex.exec(text)) !== null) {
+    results.push({
       id: uid(),
       ruleId: 'indent',
       index: m.index,
@@ -35,11 +31,16 @@ export const analyzeText = (text: string): Correction[] => {
       reason: '段落の行頭は1字空けてください。',
     });
   }
+  return results;
+};
 
-  // ルール2: 感嘆符・疑問符の後ろに全角スペースを入れる
-  const exclRegex = /([！？])([^ 　\n」』）！？…—])/g;
-  while ((m = exclRegex.exec(text)) !== null) {
-    raw.push({
+/** ルール2: 感嘆符・疑問符の後ろに全角スペースを入れる */
+const detectExclamationSpace = (text: string): Correction[] => {
+  const results: Correction[] = [];
+  const regex = /([！？])([^ 　\n」』）！？…—])/g;
+  let m: RegExpExecArray | null;
+  while ((m = regex.exec(text)) !== null) {
+    results.push({
       id: uid(),
       ruleId: 'exclamation',
       index: m.index,
@@ -49,40 +50,45 @@ export const analyzeText = (text: string): Correction[] => {
       reason: '感嘆符（！？）の後は1字空けてください。',
     });
   }
+  return results;
+};
 
-  // ルール3: 三点リーダの適正化（表記ゆれ修正と偶数化）
-  // 連続する「…」、または2文字以上の「・」「。」「.」を検知
-  const ellipsisRegex = /([…]{1,}|[・。\.]{2,})/g;
-  while ((m = ellipsisRegex.exec(text)) !== null) {
+/** ルール3: 三点リーダの適正化（表記ゆれ修正と偶数化） */
+const detectEllipsis = (text: string): Correction[] => {
+  const results: Correction[] = [];
+  const regex = /([…]{1,}|[・。\.]{2,})/g;
+  let m: RegExpExecArray | null;
+  while ((m = regex.exec(text)) !== null) {
     const str = m[0];
-    
-    // 現在の文字数
+    // 奇数なら +1 して偶数個にする
     let targetLen = str.length;
-    // 奇数なら +1 して偶数個にする（例: 1文字なら2文字、3文字なら4文字）
     if (targetLen % 2 !== 0) {
       targetLen += 1;
     }
-
     const proposed = '…'.repeat(targetLen);
-
     // 既に正しい三点リーダになっている場合はスキップ
     if (str !== proposed) {
-      raw.push({
+      results.push({
         id: uid(),
         ruleId: 'ellipsis',
         index: m.index,
         length: str.length,
         original: str,
-        proposed: proposed,
+        proposed,
         reason: '三点リーダは「……」のように2文字（偶数個）の全角記号で使用するのが基本です。',
       });
     }
   }
+  return results;
+};
 
-  // ルール4: 半角括弧を全角に統一
-  const halfParenRegex = /([\(\)])/g;
-  while ((m = halfParenRegex.exec(text)) !== null) {
-    raw.push({
+/** ルール4: 半角括弧を全角に統一 */
+const detectHalfWidthParen = (text: string): Correction[] => {
+  const results: Correction[] = [];
+  const regex = /([()])/g;
+  let m: RegExpExecArray | null;
+  while ((m = regex.exec(text)) !== null) {
+    results.push({
       id: uid(),
       ruleId: 'half_paren',
       index: m.index,
@@ -92,16 +98,21 @@ export const analyzeText = (text: string): Correction[] => {
       reason: '小説の本文では全角の丸括弧（）を使用するのが一般的です。',
     });
   }
+  return results;
+};
 
-  // ルール5: カギ括弧・丸括弧の閉じ忘れ（行単位）
+/** ルール5: カギ括弧・丸括弧の閉じ忘れ（行単位） */
+const detectUnclosedBrackets = (text: string): Correction[] => {
+  const results: Correction[] = [];
   let offset = 0;
   const lines = text.split('\n');
+
   for (const line of lines) {
     // カギ括弧
     const openKagi = (line.match(/「/g) || []).length;
     const closeKagi = (line.match(/」/g) || []).length;
     if (openKagi > closeKagi) {
-      raw.push({
+      results.push({
         id: uid(),
         ruleId: 'quote',
         index: offset + line.length,
@@ -115,7 +126,7 @@ export const analyzeText = (text: string): Correction[] => {
     const openParen = (line.match(/[（(]/g) || []).length;
     const closeParen = (line.match(/[）)]/g) || []).length;
     if (openParen > closeParen) {
-      raw.push({
+      results.push({
         id: uid(),
         ruleId: 'paren_close',
         index: offset + line.length,
@@ -128,21 +139,49 @@ export const analyzeText = (text: string): Correction[] => {
     offset += line.length + 1;
   }
 
-  // ルール6: 誤字検知
-  const typoRegex = /もろちん/g;
-  while ((m = typoRegex.exec(text)) !== null) {
-    raw.push({
-      id: uid(),
-      ruleId: 'typo',
-      index: m.index,
-      length: 4,
-      original: 'もろちん',
-      proposed: 'もちろん',
-      reason: 'タイポ（誤字）の可能性があります。「もちろん」の意図か確認してください。',
-    });
-  }
+  return results;
+};
 
-  // 重複排除: 同じ範囲がカバーされている場合、より長い（具体的な）修正を優先する
+/** ルール6: 誤字検知（辞書ベース） */
+const detectTypos = (text: string): Correction[] => {
+  // 誤字辞書: [検索パターン, 修正候補, 理由] のタプル配列
+  const typoDict: [RegExp, string, string][] = [
+    [/もろちん/g, 'もちろん', '「もちろん」の意図か確認してください。'],
+  ];
+
+  const results: Correction[] = [];
+  for (const [regex, proposed, hint] of typoDict) {
+    let m: RegExpExecArray | null;
+    while ((m = regex.exec(text)) !== null) {
+      results.push({
+        id: uid(),
+        ruleId: 'typo',
+        index: m.index,
+        length: m[0].length,
+        original: m[0],
+        proposed,
+        reason: `タイポ（誤字）の可能性があります。${hint}`,
+      });
+    }
+  }
+  return results;
+};
+
+// --- メインの解析・適用ロジック ---
+
+/**
+ * テキストを解析し、校正候補を返す
+ * 各ルールは独立して検出を行い、最後に重複排除する
+ */
+export const analyzeText = (text: string): Correction[] => {
+  const raw = [
+    ...detectIndent(text),
+    ...detectExclamationSpace(text),
+    ...detectEllipsis(text),
+    ...detectHalfWidthParen(text),
+    ...detectUnclosedBrackets(text),
+    ...detectTypos(text),
+  ];
   return deduplicateCorrections(raw);
 };
 
@@ -150,7 +189,7 @@ export const analyzeText = (text: string): Correction[] => {
  * 重複する修正を排除する
  * 同じ文字範囲にかかる修正が複数ある場合、より長い（具体的な）修正を優先する
  * 例: index=0 の段落下げ(length=1) と index=0 のタイポ(length=4) が重なる場合、
- *      タイポ修正が優先され、段落下げはタイポ修正の proposed に対して再適用する
+ *     タイポ修正が優先され、段落下げはタイポ修正の proposed に対して再適用する
  */
 const deduplicateCorrections = (corrections: Correction[]): Correction[] => {
   // index順、同じならlengthが大きい順にソート
@@ -176,10 +215,7 @@ const deduplicateCorrections = (corrections: Correction[]): Correction[] => {
       result.push(c);
       coveredUntil = cEnd;
     } else if (cEnd <= coveredUntil) {
-      // 完全に既存の修正範囲内に含まれる場合
-      // 既に採用済みの修正があるので、この修正を「マージ」する
-      // 例: タイポ(0-4)が先に採用され、段落下げ(0-1)が後に来た場合
-      //     タイポの proposed の先頭に全角スペースを追加する
+      // 完全に既存の修正範囲内に含まれる場合→マージする
       const parent = result.find(
         (r) => r.index <= c.index && r.index + r.length >= cEnd
       );
