@@ -110,7 +110,7 @@ function App() {
 
       <hr />
       <div className="footer">
-        <a href="https://tkwsnb.net/">トップへ戻る</a> | このツールはオープンソースです。
+        <a href="https://tkwsnb.net/">トップへ戻る</a> | <a href="https://x.com/tkwsnb">作った人</a>
       </div>
     </div>
   );
