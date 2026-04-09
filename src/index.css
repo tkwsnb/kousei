@@ -1,3 +1,9 @@
+/* ========================================
+ * 本文校正くん - クラシカルスタイルシート
+ * 阿部寛ホームページ風の白背景・明朝体デザイン
+ * ======================================== */
+
+/* --- ベーススタイル --- */
 body {
   font-family: "MS PMincho", "MS Mincho", "ＭＳ Ｐ明朝", "ＭＳ 明朝", serif;
   background-color: #ffffff;
@@ -14,12 +20,14 @@ a:visited {
   color: #800080;
 }
 
+/* --- 区切り線 --- */
 hr {
   border: none;
   border-top: 1px solid #000000;
   margin: 20px 0;
 }
 
+/* --- テーブル共通 --- */
 table {
   border-collapse: collapse;
 }
@@ -32,12 +40,50 @@ th, td {
   padding: 5px;
 }
 
+/* --- ヘッダー --- */
 h1 {
   text-align: center;
   border-bottom: 2px solid #000000;
   padding-bottom: 5px;
 }
 
+.subtitle {
+  text-align: center;
+}
+
+/* --- 文字数統計 --- */
+.stats {
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+/* --- ボタン共通 --- */
+button {
+  font-family: inherit;
+  font-size: 14px;
+  padding: 5px 10px;
+  border: 1px outset #cccccc;
+  background-color: #e0e0e0;
+  cursor: pointer;
+}
+
+button:active {
+  border: 1px inset #cccccc;
+}
+
+.btn-primary {
+  font-size: 16px;
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+/* --- コントロールエリア --- */
+.controls {
+  text-align: center;
+  margin: 10px 0;
+}
+
+/* --- 2ペインレイアウト --- */
 .container {
   display: flex;
   flex-direction: row;
@@ -49,7 +95,7 @@ h1 {
   padding: 10px;
   border: 1px solid #000000;
   margin: 5px;
-  height: 600px;
+  height: 400px;
   display: flex;
   flex-direction: column;
 }
@@ -67,6 +113,7 @@ h1 {
   overflow-y: auto;
 }
 
+/* --- テキストエリア --- */
 textarea {
   width: 100%;
   height: 100%;
@@ -79,6 +126,7 @@ textarea {
   line-height: 1.6;
 }
 
+/* --- 校正プレビュー --- */
 .preview-text {
   font-family: inherit;
   font-size: 16px;
@@ -86,37 +134,47 @@ textarea {
   line-height: 1.6;
 }
 
+/* --- 差分ハイライト（赤字） --- */
 .diff-add {
   color: #ff0000;
   font-weight: bold;
   background-color: #ffe6e6;
 }
 
+/* --- 修正提案リスト --- */
 .correction-list {
   margin-top: 20px;
   border: 1px solid #000000;
   padding: 10px;
 }
 
-.stats {
+.correction-actions {
   margin-bottom: 10px;
-  font-weight: bold;
 }
 
-button {
-  font-family: inherit;
-  font-size: 14px;
-  padding: 5px 10px;
-  border: 1px outset #cccccc;
-  background-color: #e0e0e0;
-  cursor: pointer;
+.correction-actions button {
+  margin-right: 5px;
 }
 
-button:active {
-  border: 1px inset #cccccc;
+.correction-table {
+  width: 100%;
 }
 
-.controls {
+.col-toggle {
+  width: 50px;
+}
+
+.col-before,
+.col-after {
+  width: 100px;
+}
+
+.cell-center {
   text-align: center;
-  margin: 10px 0;
+}
+
+/* --- フッター --- */
+.footer {
+  text-align: center;
+  font-size: 12px;
 }

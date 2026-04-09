@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Correction } from '../lib/kousei';
+import type { Correction } from '../lib/kousei';
 
 interface DiffViewerProps {
   originalText: string;
@@ -7,6 +7,15 @@ interface DiffViewerProps {
   activeIds: Set<string>;
 }
 
+/**
+ * 校正プレビュー: 原文の中で修正箇所を赤字ハイライトして表示する
+ *
+ * 修正の種類:
+ * - length > 0 : 原文の一部を proposed で「置換」する
+ * - length === 0 : 原文の特定位置に proposed を「挿入」する
+ *
+ * 重複はanalyzeText側で排除済みなので、ここでは単純に処理する
+ */
 export const DiffViewer: React.FC<DiffViewerProps> = ({ originalText, corrections, activeIds }) => {
   const elements = useMemo(() => {
     if (!originalText) {
@@ -14,28 +23,48 @@ export const DiffViewer: React.FC<DiffViewerProps> = ({ originalText, correction
     }
 
     const nodes: React.ReactNode[] = [];
-    let currentIndex = 0;
+    let cursor = 0; // 原文上の現在位置
 
-    const activeCorrections = corrections
+    // アクティブな修正を index 昇順でソート
+    const active = corrections
       .filter((c) => activeIds.has(c.id))
       .sort((a, b) => a.index - b.index);
 
-    for (const c of activeCorrections) {
-      if (c.index > currentIndex) {
-        nodes.push(<span key={`text-${currentIndex}`}>{originalText.slice(currentIndex, c.index)}</span>);
+    for (const c of active) {
+      // 修正箇所の開始位置がカーソルより前ならスキップ（重複排除漏れ対策）
+      if (c.index < cursor) continue;
+
+      // 修正箇所の前の通常テキストを出力
+      if (c.index > cursor) {
+        nodes.push(
+          <span key={`t-${cursor}`}>{originalText.slice(cursor, c.index)}</span>
+        );
       }
 
-      nodes.push(
-        <span key={`diff-${c.id}`} className="diff-add" title={c.reason}>
-          {c.proposed}
-        </span>
-      );
-
-      currentIndex = c.index + c.length;
+      if (c.length === 0) {
+        // 挿入型: 原文はそのままで、proposed を赤字で差し込む
+        nodes.push(
+          <span key={`ins-${c.id}`} className="diff-add" title={c.reason}>
+            {c.proposed}
+          </span>
+        );
+        // カーソルは進めない（原文の文字を消費していない）
+      } else {
+        // 置換型: 原文の該当部分を proposed で置き換えて赤字表示
+        nodes.push(
+          <span key={`rep-${c.id}`} className="diff-add" title={c.reason}>
+            {c.proposed}
+          </span>
+        );
+        cursor = c.index + c.length;
+      }
     }
 
-    if (currentIndex < originalText.length) {
-      nodes.push(<span key={`text-${currentIndex}`}>{originalText.slice(currentIndex)}</span>);
+    // 残りの通常テキスト
+    if (cursor < originalText.length) {
+      nodes.push(
+        <span key={`t-${cursor}`}>{originalText.slice(cursor)}</span>
+      );
     }
 
     return nodes;

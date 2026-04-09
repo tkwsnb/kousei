@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { analyzeText, applyCorrections, Correction } from './lib/kousei';
+import { analyzeText, applyCorrections, type Correction } from './lib/kousei';
 import { calculateStats } from './lib/stats';
 import { DiffViewer } from './components/DiffViewer';
 import { CorrectionList } from './components/CorrectionList';
@@ -10,15 +10,18 @@ function App() {
   const [corrections, setCorrections] = useState<Correction[]>([]);
   const [activeIds, setActiveIds] = useState<Set<string>>(new Set());
 
+  // 入力テキストが変わるたびにリアルタイムで統計を再計算
   const stats = useMemo(() => calculateStats(inputText), [inputText]);
 
+  /** 「チェックする」ボタン押下時の処理 */
   const handleCheck = () => {
-    const newCorrections = analyzeText(inputText);
-    setCorrections(newCorrections);
-    setActiveIds(new Set(newCorrections.map(c => c.id)));
+    const found = analyzeText(inputText);
+    setCorrections(found);
+    setActiveIds(new Set(found.map((c) => c.id)));
     setCheckedText(inputText);
   };
 
+  /** 「エディタに反映する」ボタン押下時の処理 */
   const handleApply = () => {
     if (corrections.length === 0) return;
     const finalText = applyCorrections(checkedText, corrections, activeIds);
@@ -28,8 +31,9 @@ function App() {
     setCheckedText('');
   };
 
+  /** 個別の修正のオン・オフを切り替える */
   const toggleCorrection = (id: string) => {
-    setActiveIds(prev => {
+    setActiveIds((prev) => {
       const next = new Set(prev);
       if (next.has(id)) {
         next.delete(id);
@@ -40,18 +44,19 @@ function App() {
     });
   };
 
+  /** すべて適用 / すべて解除 */
   const toggleAll = (active: boolean) => {
-    if (active) {
-      setActiveIds(new Set(corrections.map(c => c.id)));
-    } else {
-      setActiveIds(new Set());
-    }
+    setActiveIds(
+      active ? new Set(corrections.map((c) => c.id)) : new Set()
+    );
   };
 
   return (
     <div>
-      <h1>Kousei-Note (仮)</h1>
-      <p style={{ textAlign: 'center' }}>阿部寛のホームページ風クラシカル校正ツール</p>
+      <h1>本文校正くん</h1>
+      <p className="subtitle">
+        段落下げや感嘆符（！？）後ろの空白、かぎ括弧（「」）や丸括弧（（））の閉じ忘れをチェックするための小説向け校正ツール
+      </p>
       <hr />
 
       <div className="stats">
@@ -62,17 +67,17 @@ function App() {
       </div>
 
       <div className="controls">
-        <button onClick={handleCheck} style={{ marginRight: '10px', fontSize: '16px', fontWeight: 'bold' }}>
+        <button className="btn-primary" onClick={handleCheck}>
           ▼ チェックする
         </button>
-        <button onClick={handleApply} style={{ fontSize: '16px', fontWeight: 'bold' }}>
-          ◀ エディターに反映する
+        <button className="btn-primary" onClick={handleApply}>
+          ◀ エディタに反映する
         </button>
       </div>
 
       <div className="container">
         <div className="pane">
-          <div className="pane-title">■ 原文エディター</div>
+          <div className="pane-title">■ 原文エディタ</div>
           <div className="pane-content">
             <textarea
               value={inputText}
@@ -102,9 +107,9 @@ function App() {
           onToggleAll={toggleAll}
         />
       )}
-      
+
       <hr />
-      <div style={{ textAlign: 'center', fontSize: '12px' }}>
+      <div className="footer">
         <a href="#">トップへ戻る</a> | このツールはオープンソースです。
       </div>
     </div>
