@@ -3,6 +3,7 @@ import { analyzeText, applyCorrections, type Correction } from './lib/kousei';
 import { calculateStats } from './lib/stats';
 import { DiffViewer } from './components/DiffViewer';
 import { CorrectionList } from './components/CorrectionList';
+import { AdSense } from './components/AdSense';
 
 function App() {
   const [inputText, setInputText] = useState<string>('');
@@ -66,6 +67,8 @@ function App() {
           原稿用紙（400字詰）換算: 約 {stats.manuscriptPages} 枚
         </div>
       </header>
+
+      <AdSense />
 
       <main>
         <div className="controls">

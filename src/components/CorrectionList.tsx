@@ -1,5 +1,6 @@
 import React from 'react';
 import type { Correction } from '../lib/kousei';
+import { AdSense } from './AdSense';
 
 interface Props {
   corrections: Correction[];
@@ -52,6 +53,7 @@ export const CorrectionList: React.FC<Props> = ({ corrections, activeIds, onTogg
           ))}
         </tbody>
       </table>
+      <AdSense format="fluid" />
     </div>
   );
 };
